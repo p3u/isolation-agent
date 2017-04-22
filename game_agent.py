@@ -4,7 +4,6 @@ and include the results in your report.
 """
 import random
 
-
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
@@ -34,8 +33,13 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    return float(len(game.get_legal_moves(player)))
 
 
 def custom_score_2(game, player):
@@ -211,12 +215,54 @@ class MinimaxPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
+
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        def min_value(state, depths_left):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
 
+            if len(state.get_legal_moves()) == 0 or depths_left == 0:
+                return self.score(state, self)
+
+            v = 99999999999999999
+            depths_left -= 1
+
+            for move in state.get_legal_moves():
+                v = min(v, max_value(state.forecast_move(move), depths_left))
+            return v
+
+        def max_value(state, depths_left):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            if len(state.get_legal_moves()) == 0 or depths_left == 0:
+                print("aaaa", self.score(state, self))
+                return self.score(state, self)
+
+            v = -999999999999999
+            depths_left -= 1
+
+            for move in state.get_legal_moves():
+                v = max(v, min_value(state.forecast_move(move), depths_left))
+            return v
+
+        move = (-1, -1)
+        max_so_far = -99999999999999
+        print("PlayerTurn", game.active_player)
+        print("LegalMoves", game.get_legal_moves())
+        for move in game.get_legal_moves():
+            print("TryMove", move)
+            depths_left = depth - 1
+            branch_value = min_value(game.forecast_move(move), depths_left)
+            print("BranchValue", branch_value)
+            max_so_far = max(max_so_far, branch_value)
+            if max_so_far == branch_value:
+                max_move = move
+        print("Max Value", max_so_far)
+        print("Chosen Move", max_move)
+        return max_move
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax

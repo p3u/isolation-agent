@@ -10,6 +10,12 @@ __pycache__/
 # C extensions
 *.so
 
+# project submissions
+*.zip
+
+# submission results
+*.json
+
 # Distribution / packaging
 .Python
 env/
