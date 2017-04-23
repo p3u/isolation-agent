@@ -238,7 +238,6 @@ class MinimaxPlayer(IsolationPlayer):
                 raise SearchTimeout()
 
             if len(state.get_legal_moves()) == 0 or depths_left == 0:
-                print("aaaa", self.score(state, self))
                 return self.score(state, self)
 
             v = -999999999999999
@@ -249,6 +248,7 @@ class MinimaxPlayer(IsolationPlayer):
             return v
 
         move = (-1, -1)
+        max_move = move
         max_so_far = -99999999999999
         print("PlayerTurn", game.active_player)
         print("LegalMoves", game.get_legal_moves())
@@ -302,8 +302,20 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Initialize the best move so that this function returns something
+        # in case the search fails due to timeout
+        best_move = (-1, -1)
+
+        try:
+            # The try/except block will automatically catch the exception
+            # raised when the timer is about to expire.
+            return self.alphabeta(game, self.search_depth, 3, 3)
+
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -353,5 +365,65 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        def min_value(state, depths_left, alpha, beta):
+            # Just seeing if program timed-out
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            # If we have no available moves, or reached the end of the tree
+            # Return the score of that leaf
+            if len(state.get_legal_moves()) == 0 or depths_left == 0:
+                return self.score(state, self)
+
+            #Setting the current min value to inf
+            v = 99999999999999999
+
+            for move in state.get_legal_moves():
+                # For each move, selecting minimun value
+                v = min(v, max_value(state.forecast_move(move), depths_left - 1, alpha, beta))
+                # If the current min value is less than alpha, return it
+                if v <= alpha:
+                    print("Prunned")
+                    return v
+                # updating beta to be the minimum
+                beta = min(beta, v)
+            return v
+
+        def max_value(state, depths_left, alpha, beta):
+            # Just seeing if program timed-out
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            # If we have no moves left or reached the bottom of our reserach depth
+            # return the leaf value
+            if len(state.get_legal_moves()) == 0 or depths_left == 0:
+                return self.score(state, self)
+
+            v = -999999999999999
+
+            for move in state.get_legal_moves():
+                # For each move, select the maximum value
+                v = max(v, min_value(state.forecast_move(move), depths_left - 1, alpha, beta))
+                # If we found a value that higher than our Beta, return it right away
+                if v >= beta:
+                    return v
+                # update our alpha with the maximum value found so far
+                alpha = max(alpha, v)
+            return v
+
+        # Initizializing with invalid move, low maximum value
+        move = (-1, -1)
+        max_so_far = -99999999999999
+        for move in game.get_legal_moves():
+            branch_value = min_value(game.forecast_move(move), depth - 1, alpha, beta)
+            # If branch value is the max we can reach, return it
+            if branch_value >= beta:
+                return move
+            # Else, check if it's bigger then other branches
+            if branch_value > max_so_far:
+            # If it is, update max move and max_so_far
+                max_so_far = branch_value
+                max_move = move
+            alpha = max(alpha, max_so_far)
+
+        #After checking all branches, return move that maximazes the heuristics value
+        return max_move

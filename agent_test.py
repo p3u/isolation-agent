@@ -18,25 +18,40 @@ class IsolationTest(unittest.TestCase):
 
     def setUp(self):
         reload(game_agent)
-        self.player1 = game_agent.MinimaxPlayer()
-        self.player2 = game_agent.MinimaxPlayer()
-        self.game = isolation.Board(self.player1, self.player2, width=5, height=5)
-        self.game.apply_move((1, 2))
-        self.game.apply_move((2, 3))
+        self.player1 = game_agent.AlphaBetaPlayer(search_depth=2)
+        self.player2 = game_agent.AlphaBetaPlayer(search_depth=2)
+        self.game = isolation.Board(self.player1, self.player2, width=9, height=9)
+        self.game.apply_move((4, 4))
+        self.game.apply_move((5, 4))
 
-        self.game.apply_move((0, 0))
-        self.game.apply_move((0, 2))
-
+        self.game.apply_move((2, 5))
         self.game.apply_move((2, 1))
-        self.game.apply_move((1, 0))
 
-        self.game.apply_move((4, 0))
+        self.game.apply_move((4, 2))
+        self.game.apply_move((5, 2))
+
+        self.game.apply_move((3, 4))
+        self.game.apply_move((6, 4))
+
+        self.game.apply_move((4, 5))
+        self.game.apply_move((5, 5))
+
+        self.game.apply_move((4, 5))
+        self.game.apply_move((5, 5))
+
+        self.game.apply_move((4, 6))
+        self.game.apply_move((3, 7))
+
+        self.game.apply_move((2, 4))
+        self.game.apply_move((4, 3))
+
 
         print(self.game.to_string())
 
 
     def test_minimax(self):
-        assert(self.player2.get_move(self.game, time_left) == (2, 2))
+        self.player2.get_move(self.game, time_left)
+
 
 if __name__ == '__main__':
     unittest.main()
